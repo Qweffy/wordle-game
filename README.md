@@ -1,56 +1,107 @@
-# Welcome to your Expo app 👋
+# Wordle Game
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+A Wordle clone built with React Native, Expo, and TypeScript. Runs on iOS, Android, and web.
 
-## Get started
+## Screenshots
 
-1. Install dependencies
+<!-- Add screenshots here -->
+<!-- | Game Board | Winning | Game Over | -->
+<!-- |:---:|:---:|:---:| -->
+<!-- | ![Board](docs/board.png) | ![Win](docs/win.png) | ![Loss](docs/loss.png) | -->
 
-   ```bash
-   npm install
-   ```
+## Approach
 
-2. Start the app
+The project follows a **domain-first** architecture: types and pure logic are defined before any UI code. This separation means the game engine can be tested independently of React Native.
 
-   ```bash
-   npx expo start
-   ```
+**Key decisions:**
 
-In the output, you'll find options to open the app in a
+- **Pure functions over stateful classes.** `submitGuess(state, guess)` returns a new immutable state — no side effects, no mutation. This makes the logic easy to test and reason about.
+- **Two-pass letter evaluation.** The `evaluateGuess` algorithm handles duplicate letters correctly by first marking exact positional matches ("correct"), then scanning remaining letters for partial matches ("present"). This prevents the same target letter from being matched twice — a subtle bug in many Wordle implementations.
+- **Word validation against a real dictionary.** Guesses are validated against the official 2,314-word Wordle answer list. Invalid words are rejected with user-visible feedback.
+- **Tests before UI.** All domain logic was written and tested before building any React components.
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+## Model
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+The game state is represented by a single `WordleGameState` type:
 
-## Get a fresh project
-
-When you're ready, run:
-
-```bash
-npm run reset-project
+```typescript
+type WordleGameState = {
+  targetWord: string;
+  maxGuesses: number;
+  guesses: LetterResult[][];      // each guess is an array of { letter, status }
+  remainingGuesses: number;
+  usedLetters: Record<string, LetterStatus>;  // tracks best status per letter for keyboard coloring
+  status: GameStatus;             // "playing" | "won" | "lost"
+};
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+State transitions are handled by two pure functions:
 
-### Other setup steps
+- `createInitialGameState(targetWord?, maxGuesses?)` — creates a fresh game with a random word from the answer pool.
+- `submitGuess(state, guess)` — validates (length, characters, dictionary), evaluates, and returns the next state.
 
-- To set up ESLint for linting, run `npx expo lint`, or follow our guide on ["Using ESLint and Prettier"](https://docs.expo.dev/guides/using-eslint/)
-- If you'd like to set up unit testing, follow our guide on ["Unit Testing with Jest"](https://docs.expo.dev/develop/unit-testing/)
-- Learn more about the TypeScript setup in this template in our guide on ["Using TypeScript"](https://docs.expo.dev/guides/typescript/)
+The `usedLetters` map tracks the "best" status per letter (`correct > present > absent`), ready for on-screen keyboard integration.
 
-## Learn more
+## What Works Well
 
-To learn more about developing your project with Expo, look at the following resources:
+- **Correct duplicate letter handling.** The two-pass algorithm (greens first, then yellows against remaining supply) handles all edge cases — tested with 8 dedicated scenarios including surplus duplicates and same-letter correct+present in one guess.
+- **28 deterministic unit tests** covering all game paths: win, loss, playing, validation, normalization, immutability, multi-turn flows.
+- **Clean domain/UI separation.** Components contain zero business logic — they only render state and dispatch actions.
+- **Immutable state transitions.** Tests verify that `submitGuess` never mutates the input state.
+- **Full toolchain.** `npm run check` runs TypeScript strict mode, ESLint, Prettier, and Jest in sequence.
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+## What Could Improve
 
-## Join the community
+- **On-screen keyboard.** `usedLetters` is tracked and ready but not yet visualized — a keyboard component would show which letters have been tried and their statuses.
+- **Animations.** Tile flip on guess submission and shake on invalid words would improve feedback.
+- **Accessibility.** Screen reader labels for tile colors, keyboard navigation support.
+- **Dark mode.** Colors are centralized in constants but currently light-mode only.
 
-Join our community of developers creating universal apps.
+## Trade-offs
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+| Decision | Why |
+|----------|-----|
+| Answer list as valid guesses | Using the 2,314-word answer list for validation instead of the full 13,000-word guess list. Keeps the bundle small while covering common words. |
+| `usedLetters` tracked but not displayed | Prepares for on-screen keyboard without adding UI complexity now |
+| `throw` on invalid guess | Fail-fast at the domain boundary; the UI catches and displays errors gracefully |
+| Immutable state updates | Predictable transitions, easy to test, compatible with React's rendering model |
+| Random target word from answer pool | Each game is unique without needing a backend |
+
+## Running the Project
+
+```bash
+# Install dependencies
+npm install
+
+# Start the dev server (opens QR code for iOS/Android + web)
+npx expo start
+
+# Or run on a specific platform
+npx expo start --ios
+npx expo start --android
+npx expo start --web
+
+# Run all checks (typecheck + lint + format + tests)
+npm run check
+
+# Run tests only
+npm test
+```
+
+## Project Structure
+
+```
+src/
+  domain/
+    wordle.types.ts       # Type definitions
+    wordle.constants.ts   # Game constants and shared config (no magic values in UI)
+    wordle.logic.ts       # Pure game logic (evaluateGuess, submitGuess)
+    wordle.words.ts       # 2,314-word dictionary (official Wordle answer list)
+  components/
+    Board.tsx             # Game board grid with colored tiles and live preview
+    GuessInput.tsx        # Text input with validation feedback
+  screens/
+    WordleScreen.tsx      # Main game screen
+  __tests__/
+    wordle.logic.test.ts  # 28 unit tests
+```
