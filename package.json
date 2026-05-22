@@ -3,41 +3,40 @@
   "main": "expo-router/entry",
   "version": "1.0.0",
   "dependencies": {
-    "@expo/ui": "~56.0.11",
     "expo": "~56.0.3",
-    "expo-constants": "~56.0.14",
-    "expo-device": "~56.0.4",
-    "expo-font": "~56.0.5",
-    "expo-glass-effect": "~56.0.4",
-    "expo-image": "~56.0.8",
-    "expo-linking": "~56.0.11",
     "expo-router": "~56.2.5",
     "expo-splash-screen": "~56.0.9",
     "expo-status-bar": "~56.0.4",
-    "expo-symbols": "~56.0.5",
-    "expo-system-ui": "~56.0.5",
-    "expo-web-browser": "~56.0.5",
     "react": "19.2.3",
     "react-dom": "19.2.3",
     "react-native": "0.85.3",
     "react-native-gesture-handler": "~2.31.1",
-    "react-native-reanimated": "4.3.1",
     "react-native-safe-area-context": "~5.7.0",
     "react-native-screens": "4.25.1",
-    "react-native-web": "~0.21.0",
-    "react-native-worklets": "0.8.3"
+    "react-native-web": "~0.21.0"
   },
   "devDependencies": {
+    "@types/jest": "^30.0.0",
     "@types/react": "~19.2.2",
+    "eslint": "^9.0.0",
+    "eslint-config-expo": "~56.0.4",
+    "eslint-config-prettier": "^10.1.8",
+    "jest": "^30.4.2",
+    "prettier": "^3.8.3",
+    "ts-jest": "^29.4.11",
     "typescript": "~6.0.3"
   },
   "scripts": {
     "start": "expo start",
-    "reset-project": "node ./scripts/reset-project.js",
     "android": "expo start --android",
     "ios": "expo start --ios",
     "web": "expo start --web",
-    "lint": "expo lint"
+    "typecheck": "tsc --noEmit && tsc --noEmit -p tsconfig.test.json",
+    "lint": "expo lint",
+    "format": "prettier --write \"src/**/*.{ts,tsx}\"",
+    "format:check": "prettier --check \"src/**/*.{ts,tsx}\"",
+    "test": "jest --verbose",
+    "check": "npm run typecheck && expo lint && prettier --check \"src/**/*.{ts,tsx}\" && jest --verbose"
   },
   "private": true
 }
