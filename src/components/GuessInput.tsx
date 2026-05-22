@@ -21,13 +21,13 @@ export function GuessInput({ onChangeText, onSubmit, disabled }: GuessInputProps
   };
 
   const handleSubmit = () => {
-    const trimmed = currentText.current.trim().toLowerCase();
-    if (trimmed.length !== WORD_LENGTH) {
+    const normalized = currentText.current.toLowerCase();
+    if (normalized.length !== WORD_LENGTH) {
       setError("Not enough letters");
       return;
     }
     try {
-      onSubmit(trimmed);
+      onSubmit(normalized);
       setError(null);
       currentText.current = "";
       inputRef.current?.clear();

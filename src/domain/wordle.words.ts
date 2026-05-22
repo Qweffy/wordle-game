@@ -2316,4 +2316,4 @@ export const VALID_WORDS = new Set([
   "zonal",
 ]);
 
-export const ANSWER_WORDS = [...VALID_WORDS];
+export const ANSWER_WORDS: readonly string[] = [...VALID_WORDS];
