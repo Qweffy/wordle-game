@@ -6,6 +6,12 @@ A Wordle clone built with React Native, Expo, and TypeScript. Runs on iOS, Andro
 
 <!-- Add screenshots here -->
 <!-- | Game Board | Winning | Game Over | -->
+<img width="485" height="1025" alt="image" src="https://github.com/user-attachments/assets/227f0e92-692f-4c05-93fe-03442728f478" />
+<img width="500" height="1035" alt="image" src="https://github.com/user-attachments/assets/596659bc-ac4d-406c-b1c7-68db297b658b" />
+<img width="519" height="1039" alt="image" src="https://github.com/user-attachments/assets/df37ff8d-594f-4f16-95bb-059d2fe6082b" />
+
+
+
 <!-- |:---:|:---:|:---:| -->
 <!-- | ![Board](docs/board.png) | ![Win](docs/win.png) | ![Loss](docs/loss.png) | -->
 
